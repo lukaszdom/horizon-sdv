@@ -64,7 +64,7 @@ module "base" {
   sdv_build_node_pool_machine_type   = "c2d-highcpu-112"
   sdv_build_node_pool_max_node_count = 20
 
-  sdv_openbsw_build_node_pool_machine_type   = "n1-standard-8"
+  sdv_openbsw_build_node_pool_machine_type   = "c2d-highcpu-8"
   sdv_openbsw_build_node_pool_max_node_count = 20
 
   sdv_bastion_host_name    = "sdv-bastion-host"
@@ -172,57 +172,42 @@ module "base" {
       ])
     },
     sa5 = {
-      account_id   = "prometheus-ui"
-      display_name = "prometheus-ui"
-      description  = "prometheus-ui/prometheus-ui in GKE cluster makes use of this account through WI"
+        account_id   = "monitoring"
+        display_name = "monitoring-sa"
+        description  = "monitoring/monitoring-sa in GKE cluster makes use of this account through WI"
 
-      gke_sas = [
-        {
-          gke_ns = "monitoring"
-          gke_sa = "prometheus-ui"
-        }
-      ]
+        gke_sas = [
+          {
+            gke_ns = "monitoring"
+            gke_sa = "monitoring-sa"
+          }
+        ]
 
-      roles = toset([
-        "roles/monitoring.viewer"
-      ])
-    },
+        roles = toset([
+          "roles/iam.workloadIdentityUser",
+          "roles/monitoring.viewer"
+        ])
+      },
     sa6 = {
-      account_id   = "monitoring"
-      display_name = "monitoring-sa"
-      description  = "monitoring/monitoring-sa in GKE cluster makes use of this account through WI"
+      account_id   = "monitoring-writer"
+      display_name = "monitoring-writer-sa"
+      description  = "monitoring-writer/monitoring-writer-sa-sa in GKE cluster makes use of this account through WI"
 
       gke_sas = [
         {
           gke_ns = "monitoring"
-          gke_sa = "monitoring-sa"
+          gke_sa = "monitoring-writer-sa"
         }
       ]
-
       roles = toset([
+        "roles/monitoring.metricWriter",
+        "roles/monitoring.viewer",
+        "roles/iam.serviceAccountTokenCreator",
+        "roles/iam.serviceAccountUser",
         "roles/iam.workloadIdentityUser"
       ])
     },
     sa7 = {
-      account_id   = "kube-state-metrics"
-      display_name = "kube-state-metrics-sa"
-      description  = "kube-state-metrics/kube-state-metrics-sa in GKE cluster makes use of this account through WI"
-
-      gke_sas = [
-        {
-          gke_ns = "kube-state-metrics"
-          gke_sa = "gmp-public"
-        }
-      ]
-      roles = toset([
-        #"roles/monitoring.metricWriter",
-        "roles/monitoring.viewer",
-        #"roles/iam.serviceAccountTokenCreator",
-        #"roles/iam.serviceAccountUser",
-        "roles/iam.workloadIdentityUser"
-      ])
-    },
-    sa8 = {
       account_id   = "gke-terraform-workloads-sa"
       display_name = "terraform-workloads-sa"
       description  = "jenkins/terraform-workloads-sa in GKE cluster makes use of this account through WI to deploy extra on-demand resources via workload pipelines"
@@ -423,7 +408,17 @@ module "base" {
         }
       ]
     }
-
+    s14 = {
+      secret_id        = "grafanaInitialPassword"
+      value            = var.sdv_gh_grafana_initial_password
+      use_github_value = true
+      gke_access = [
+        {
+          ns = "monitoring"
+          sa = "monitoring-sa"
+        },
+      ]
+    }
   }
 
   sdv_bastion_host_bash_command = <<EOT
