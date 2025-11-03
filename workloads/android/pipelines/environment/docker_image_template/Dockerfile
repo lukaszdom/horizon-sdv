@@ -13,8 +13,8 @@
 # limitations under the License.
 
 # Allow user to choose distribution, e.g. ubuntu:22.04
-ARG LINUX_DISTRIBUTION
-FROM --platform=linux/amd64 ${LINUX_DISTRIBUTION}
+ARG LINUX_DISTRIBUTION=ubuntu:22.04
+FROM ${LINUX_DISTRIBUTION}
 
 # Overrides
 ARG NODEJS_VERSION
@@ -23,6 +23,10 @@ ARG ABFS
 # ABFS specific registry and category/versions.
 ARG GOOGLE_DISTRIBUTION_REGISTRY
 ARG ABFS_DISTRIBUTION_REGISTRY
+
+# Gcloud CLI and kubectl version.
+ARG GCLOUD_CLI_VERSION="latest"
+ARG KUBECTL_VERSION="latest"
 
 # Install packages required for building AAOSP targets.
 RUN apt-get update -y && \
@@ -48,7 +52,10 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
     gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
     tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    apt-get update -y && apt-get install -y google-cloud-cli kubectl && \
+    apt-get update -y && \
+    [ "$GCLOUD_CLI_VERSION" = "latest" ] && apt-get install -y google-cloud-cli || \
+      apt-get install -y google-cloud-cli="$GCLOUD_CLI_VERSION" google-cloud-cli-anthoscli="$GCLOUD_CLI_VERSION" && \
+    [ "$KUBECTL_VERSION" = "latest" ] &&  apt-get install -y kubectl || apt-get install -y kubectl="$KUBECTL_VERSION" && \
     apt-get -y clean
 # GCS:END
 
@@ -74,10 +81,6 @@ RUN useradd -u 1000 -ms /bin/bash ${USER} && \
     usermod -aG sudo ${USER} && \
     echo "${USER} ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers
 
-RUN if [ "$ABFS" = "true" ]; then \
-        mkdir /src && chown ${USER}:${USER} /src; \
-    fi
-
 # Switch to user
 USER ${USER}
 WORKDIR /home/${USER}
@@ -98,6 +101,6 @@ ENV PATH="/root/.local/bin:/usr/local/bin:/usr/bin:$PATH"
 # Node version manager
 RUN sudo npm cache clean -f && \
     sudo npm install -g n && \
-    sudo npm install -g wait-on && \
     sudo n "${NODEJS_VERSION}" && \
+    sudo npm install -g wait-on && \
     sudo ln -sf /usr/local/bin/node /usr/local/bin/nodejs || true

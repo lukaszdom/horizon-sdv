@@ -172,9 +172,15 @@ module "base" {
       ])
     },
     sa5 = {
+<<<<<<< Updated upstream
         account_id   = "monitoring"
         display_name = "monitoring-sa"
         description  = "monitoring/monitoring-sa in GKE cluster makes use of this account through WI"
+=======
+        account_id   = "monitoring-sa"
+        display_name = "monitoring-sa"
+        description  = "monitoring-sa/monitoring-sa in GKE cluster makes use of this account through WI"
+>>>>>>> Stashed changes
 
         gke_sas = [
           {
@@ -189,9 +195,15 @@ module "base" {
         ])
       },
     sa6 = {
+<<<<<<< Updated upstream
       account_id   = "monitoring-writer"
       display_name = "monitoring-writer-sa"
       description  = "monitoring-writer/monitoring-writer-sa-sa in GKE cluster makes use of this account through WI"
+=======
+      account_id   = "monitoring-writer-sa"
+      display_name = "monitoring-writer-sa"
+      description  = "monitoring-writer-sa/monitoring-writer-sa in GKE cluster makes use of this account through WI"
+>>>>>>> Stashed changes
 
       gke_sas = [
         {

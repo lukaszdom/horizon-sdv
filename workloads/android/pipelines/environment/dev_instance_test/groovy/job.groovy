@@ -28,7 +28,9 @@ pipelineJob('Android/Environment/Development Test Instance') {
       description('''<p>The Jenkins GCE Clouds label for the VM instance template, e.g.<br/></p>
         <ul>
           <li>cuttlefish-vm-main</li>
-          <li>cuttlefish-vm-v1180</li>
+          <li>cuttlefish-vm-v1290</li>
+          <li>cuttlefish-vm-main-arm64</li>
+          <li>cuttlefish-vm-v1290-arm64</li>
         </ul>''')
       trim(true)
     }
@@ -37,6 +39,14 @@ pipelineJob('Android/Environment/Development Test Instance') {
       name('INSTANCE_MAX_UPTIME')
       choices(['1', '2', '4', '8'])
       description('''<p>Time in hours to keep instance alive.</p>''')
+    }
+
+    stringParam {
+      name('NUM_HOST_INSTANCES')
+      defaultValue('1')
+      description('''<p>Number of host instances to create.<p>
+        <p>i.e. the number of devices to create in MTK Connect testbench.</p>''')
+      trim(true)
     }
   }
 

@@ -14,9 +14,35 @@
 
 config:
   name: Horizon SDV
+  applications:
+    keycloak:
+      version: "7.1.4"
+    postgresql:
+      version: "postgresql/17.0.1"
+    zookeeper:
+      version: "zookeeper/13.8.7"
   workloads:
+    common:
+      serviceAccounts:
+        terraformWorkloadsSA:
+          name: "terraform-workloads-sa"
     android:
-      repoSyncJobs: 2
+      helm:
+        version: '5.8.104'
+      cuttlefish:
+        tag: 'v1290'
+      aospMirror:
+        workloadEnv:
+          image: "horizon-sdv/aosp-mirror-workloads/env"
+        mirrorPresets:
+          filestorePVCName: 'sdv-aosp-mirror-filestore-pvc'
+          filestorePVCMountPathInContainer: '/mnt/mirror-filestore-pvc'
+          mirrorRootSubdirectoryName: 'horizon-mirrors'
+          network: 'sdv-network'
+          subnetwork: 'sdv-subnet'
+          # region: defined in argocd-config.yaml
+          # zone: defined in argocd-config.yaml
+          # projectID: defined in argocd-config.yaml
     cloudWorkstations:
       workloadEnv:
         image: "horizon-sdv/cloud-ws-workloads/env"

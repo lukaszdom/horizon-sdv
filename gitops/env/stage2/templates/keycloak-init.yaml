@@ -68,6 +68,17 @@ type: Opaque
 stringData:
   username: "jenkins-admin"
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-grafana-admin
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+type: Opaque
+stringData:
+  username: "admin"
+---
 apiVersion: external-secrets.io/v1beta1
 kind: SecretStore
 metadata:
@@ -165,3 +176,25 @@ spec:
     - secretKey: password
       remoteRef:
         key: jenkinsInitialPassword
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: grafana-admin-initial-secret
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  refreshInterval: 10s
+  secretStoreRef:
+    kind: SecretStore
+    name: keycloak-secret-store
+  target:
+    name: keycloak-grafana-admin
+    creationPolicy: Merge
+  data:
+    - secretKey: password
+      remoteRef:
+        key: grafanaInitialPassword
+
+
